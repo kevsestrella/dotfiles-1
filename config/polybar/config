@@ -31,7 +31,7 @@ margin-top = 0
 margin-bottom = 0
 
 [bar/bar]
-monitor = ${env:MONITOR:DisplayPort-0}
+monitor = ${env:MONITOR:eDP-1}
 monitor-fallback =
 monitor-strict = false
 monitor-exact = true
@@ -63,7 +63,8 @@ font-2 = NotoColorEmoji:fontformat=truetype:scale=10:antialias=false;
 font-3 = IPAGothic:fontformat=truetype:pixelsize=10:antialias=false;
 
 modules-left = bspwm xwindow
-modules-right = crypto torrents pacman-packages subs cpu-usage cpu-temperature memory volume weather time
+modules-right = memory pacman-packages cpu-usage battery time
+;crypto torrents pacman-packages subs cpu-usage cpu-temperature memory volume weather time
 
 tray-position = right
 tray-padding = 1
@@ -187,9 +188,10 @@ interval = 1800
 type = custom/ipc
 hook-0 = polypulsevolume
 click-left = $TERMINAL -e pulsemixer &
-click-right = pulsevolctrl "output-mute" "alsa_output.pci-0000_0b_00.4.analog-stereo"
-scroll-up = pulsevolctrl "output-vol" "alsa_output.pci-0000_0b_00.4.analog-stereo" +2%
-scroll-down = pulsevolctrl "output-vol" "alsa_output.pci-0000_0b_00.4.analog-stereo" -2%
+click-right = pulsevolctrl "output-mute" "alsa_output.pci-0000_00_1b.0.analog-stereo"
+scroll-up = pulsevolctrl "output-vol" "alsa_output.pci-0000_00_1b.0.analog-stereo" +2%
+scroll-down = pulsevolctrl "output-vol" "alsa_output.pci-0000_00_1b.0.analog-stereo" -2%
+label = "%output%"
 initial = 1
 
 [module/time]

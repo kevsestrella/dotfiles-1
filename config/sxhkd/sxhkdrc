@@ -47,6 +47,10 @@ super + shift + {h,j,k,l}
 super + {0-9}
 	bspc desktop -f {0-9}
 
+#  Focus on last desktop
+mode_switch + 6
+	bspc desktop -f last
+
 # Cycle through desktops
 super + alt + {Left, Right}
   bspc desktop -f {prev, next}
@@ -68,40 +72,42 @@ ctrl + alt + {Left,Right,Up,Down}
 
 #---Tabbing---#
 # Prompt to open new app as a new tab
-#super + t; d
-#    tabdmenu
+super + t; d
+    tabdmenu
 
 # Add focused window to a tabbed instance in given direction
-# super + t; {h,j,k,l}
-#     tabc add {west,south,north,east} "$(bspc query -N -n focused)"
+super + t; {h,j,k,l}
+    tabc add {west,south,north,east} "$(bspc query -N -n focused)"
 
 # Remove one tab from tabbed
-# super + t; r
-#     tabbed=$(bspc query -N -n focused); \
-#     child=$(tabc list $tabbed | head -n1); \
-#     tabc remove $child
+super + t; r
+    tabbed=$(bspc query -N -n focused); \
+    child=$(tabc list $tabbed | head -n1); \
+    tabc remove $child
 
 #---System Control---#
 # Restart hotkey damon
 super + shift + x
   killandnotify "sxhkd" "Config reloaded" && sxhkd &
 
+super + {_, shift} + p
+	polybar-msg cmd {hide; bspc config -m focused top_padding $((`bspc config -m focused top_padding` - 32 )), show}
 super + shift + o
   reloadpolybar
 
 super + shift + {r, s}
-  prompt {"Are you sure you would like to reboot?" "sudo reboot", "Are you sure you would like to shutdown" "sudo shutdown"}
+  prompt {"Are you sure you would like to reboot?" "sudo reboot now", "Are you sure you would like to shutdown" "sudo shutdown now"}
 
 # Lock the screen
 super + shift + e
   betterlockscreen -l
 
 super + shift + c
-  toggleprogram "picom" "--experimental-backends"
+  toggleprogram "compton" "--experimental-backends"
 
 #---Script Keys---#
-super + {x, u, t, w, i, g, a, p, m}
-  {dmonitor "DisplayPort-0" "HDMI-A-0", updatepackages, notifytorrents, devenv, importandroid, openterminalin, dcalc, cpcolor, notifycrypto}
+super + {x, u, q, w, i, g, a, p}
+  {dmonitor "eDP-1" "HDMI-A-0", updatepackages, notifytorrents, devenv, importandroid, openterminalin, dcalc, cpcolor}
 
 super + {b, c, e}
   {bookmenu -p "Select a bookmark" -b ~/.config/bookmenu/browser -co $BROWSER, bookmenu -p "Select a config" -b ~/.config/bookmenu/configs -co "$TERMINAL -e nvim"}
@@ -114,24 +120,24 @@ F7
 
 # Audio Control
 # ALSA Controls
-#super + {_, shift} + p
-#  alsavolctrl Headphone {2%+, 2%-}
-#
-#super + {_, shift} + s
-#  alsavolctrl Speaker {2%+, 2%-}
-#
-#super + {Up, Down}
-#  alsavolctrl Master {2%+, 2%-}
-#
-#super + F4
-#  alsavolctrl All mute
+# super + {_, shift} + p
+#   alsavolctrl Headphone {2%+, 2%-}
+
+# super + {_, shift} + s
+#   alsavolctrl Speaker {2%+, 2%-}
+
+# super + {Up, Down}
+#   alsavolctrl Master {2%+, 2%-}
+
+# super + F4
+#   alsavolctrl All unmute
 
 # Pulse Controls
 super + {F3, F2}
-  pulsevolctrl "output-vol" "alsa_output.pci-0000_0b_00.4.analog-stereo" {+2%, -2%}
+  pulsevolctrl "output-vol" "alsa_output.pci-0000_00_1b.0.analog-stereo" {+2%, -2%}
 
-super + F4
-  pulsevolctrl "output-mute" "alsa_output.pci-0000_0b_00.4.analog-stereo"
+super + F1
+  pulsevolctrl "output-mute" "alsa_output.pci-0000_00_1b.0.analog-stereo"
 
 # Media Controls
 super + F7
@@ -147,8 +153,8 @@ super + slash
   songnotification
 
 # Brightness
-super + {Right, Left}
-  light {-A 5, -U 5} && polybar-msg hook backlight 1
+super + {F12, F11}
+  light -s sysfs/backlight/intel_backlight {-A 5, -U 5} && polybar-msg hook backlight 1
 
 # Screenshots
 Print
@@ -180,8 +186,8 @@ super + alt + l
 super + alt + {k, o, g, b, e, f, v, s, d}
   {kdenlive, obs, gimp, $BROWSER, thunderbird, pcmanfm, virtualbox, spotify, discord-canary}
 
-super + q
-  brave https://studio.youtube.com
+# super + q
+#   brave https://studio.youtube.com
 
 super + e
   kill -s USR1 $(pidof deadd-notification-center)
@@ -193,3 +199,5 @@ super + e
 super + alt + {a, r, t, h, n, c, j, p}
   $TERMINAL -e {alsamixer, lf, tremc, htop, nvim, calcurse, nvim ~/vimwiki/index.wiki, pulsemixer}
 
+super + {_, alt} + m
+	mpv {$(xsel) ,$(xsel) --no-video --loop-playlist --shuffle}

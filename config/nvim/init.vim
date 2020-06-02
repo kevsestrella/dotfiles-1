@@ -103,17 +103,25 @@ autocmd FileType markdown inoremap ,o 1.<Space><CR><++><Esc>1k<S-a>
 autocmd FileType markdown inoremap ,f +@fig:
 
 if !exists('g:vscode')
-  call plug#begin('~/local/share/nvim/plugged')
+	if has("nvim")
+		call plug#begin('~/local/share/nvim/plugged')
+	else
+		call plug#begin('~/.vim/plugged')
+	endif
   " Themes
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'tomasiser/vim-code-dark'
   " Center text
   Plug 'junegunn/goyo.vim'
-  " Code Completion
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+	" Code Completion
+	if has("nvim")
+		Plug 'neoclide/coc.nvim', {'branch': 'release'}
+	endif
   " Fuzzy find files
   Plug 'ctrlpvim/ctrlp.vim'
+	" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } already pacmaned
+	Plug 'junegunn/fzf.vim' " not sure if this'll concflict with ctrlp
   " This objectively makes vim better
   Plug 'terryma/vim-multiple-cursors'
   " Working with tags
@@ -129,13 +137,22 @@ if !exists('g:vscode')
   Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 	" Motions
 	Plug 'justinmk/vim-sneak'
+	Plug 'tpope/vim-unimpaired'
+	" git
+  Plug 'airblade/vim-gitgutter'
+	Plug 'rhysd/git-messenger.vim'
+	Plug 'tpope/vim-fugitive'
+	" ctags
+	Plug 'ludovicchabant/vim-gutentags'
+	" debug
+	if !has("nvim")
+		Plug 'puremourning/vimspector'
+	endif
 	" Misc
   Plug 'voldikss/vim-floaterm'
-  Plug 'airblade/vim-gitgutter'
 	Plug 'vimwiki/vimwiki'
 	Plug 'tpope/vim-repeat'
-	Plug 'rhysd/git-messenger.vim'
-
+	Plug 'dracula/vim', {'name': 'dracula'}
   call plug#end()
 
   " Basic settings
@@ -145,8 +162,13 @@ if !exists('g:vscode')
   set smartcase
   set encoding=utf-8
   set number relativenumber
-  set termguicolors
-  colorscheme codedark
+	if !has("nvim")
+		" set Vim-specific sequences for RGB colors
+		let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+		let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+	endif
+	set termguicolors
+  colorscheme dracula
 
   " Tab Settings"
   set shiftwidth=2
@@ -187,7 +209,7 @@ if !exists('g:vscode')
   " Vim-airline
   let g:airline#extensions#wordcount#enabled = 1
   let g:airline#extensions#hunks#non_zero_only = 1
-  let g:airline_theme = 'codedark'
+  let g:airline_theme = 'dracula'
 
   " Vim Hexokinase
   let g:Hexokinase_refreshEvents = ['InsertLeave']
@@ -270,6 +292,8 @@ if !exists('g:vscode')
         return
     endif
     call ToggleNetrw()
+		let g:NetrwIsOpen=0
+		silent Lexplore
   endfun
 
   " Close Netrw if it's the only buffer open
@@ -318,116 +342,119 @@ if !exists('g:vscode')
   " Add > at current position without closing the current tag, default is ''
   let g:closetag_close_shortcut = '<leader>>'
 
-  " ------COC SETTINGS------
-  " prettier command for coc
-  command! -nargs=0 Prettier :CocCommand prettier.formatFile
-  let g:coc_global_extensions = [
-    \ 'coc-snippets',
-    \ 'coc-pairs',
-    \ 'coc-tsserver',
-    \ 'coc-html',
-    \ 'coc-css',
-    \ 'coc-prettier',
-    \ 'coc-json',
-    \ 'coc-angular',
-    \ 'coc-vimtex'
-    \ ]
+	if has("nvim")
+		" ------COC SETTINGS------
+		" prettier command for coc
+		command! -nargs=0 Prettier :CocCommand prettier.formatFile
+		let g:coc_global_extensions = [
+			\ 'coc-snippets',
+			\ 'coc-pairs',
+			\ 'coc-tsserver',
+			\ 'coc-html',
+			\ 'coc-css',
+			\ 'coc-prettier',
+			\ 'coc-json',
+			\ 'coc-python',
+			\ 'coc-vimtex'
+			\ ]
 
-  " From Coc Readme
-  set updatetime=300
+		" From Coc Readme
+		set updatetime=300
 
-  " Some servers have issues with backup files, see #649
-  set nobackup
-  set nowritebackup
+		" Some servers have issues with backup files, see #649
+		set nobackup
+		set nowritebackup
 
-  " don't give |ins-completion-menu| messages.
-  set shortmess+=c
+		" don't give |ins-completion-menu| messages.
+		set shortmess+=c
 
-  " always show signcolumns
-  set signcolumn=yes
+		" always show signcolumns
+		set signcolumn=yes
 
-  " Use tab for trigger completion with characters ahead and navigate.
-  " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-  inoremap <silent><expr> <TAB>
-        \ pumvisible() ? "\<C-n>" :
-        \ <SID>check_back_space() ? "\<TAB>" :
-        \ coc#refresh()
-  inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+		" Use tab for trigger completion with characters ahead and navigate.
+		" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+		inoremap <silent><expr> <TAB>
+					\ pumvisible() ? "\<C-n>" :
+					\ <SID>check_back_space() ? "\<TAB>" :
+					\ coc#refresh()
+		inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
-  function! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~# '\s'
-  endfunction
+		function! s:check_back_space() abort
+			let col = col('.') - 1
+			return !col || getline('.')[col - 1]  =~# '\s'
+		endfunction
 
-  " Use <c-space> to trigger completion.
-  inoremap <silent><expr> <c-space> coc#refresh()
+		" Use <c-space> to trigger completion.
+		inoremap <silent><expr> <c-space> coc#refresh()
 
-  " Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-  " Coc only does snippet and additional edit on confirm.
-  inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-  " Or use `complete_info` if your vim support it, like:
-  " inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+		" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
+		" Coc only does snippet and additional edit on confirm.
+		inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+		" Or use `complete_info` if your vim support it, like:
+		" inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
 
-  " Use `[g` and `]g` to navigate diagnostics
-  nmap <silent> [g <Plug>(coc-diagnostic-prev)
-  nmap <silent> ]g <Plug>(coc-diagnostic-next)
+		" Use `[g` and `]g` to navigate diagnostics
+		nmap <silent> [g <Plug>(coc-diagnostic-prev)
+		nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
-  " Remap keys for gotos
-  nmap <silent> gd <Plug>(coc-definition)
-  nmap <silent> gy <Plug>(coc-type-definition)
-  nmap <silent> gi <Plug>(coc-implementation)
-  nmap <silent> gr <Plug>(coc-references)
+		" Remap keys for gotos
+		nmap <silent> gd <Plug>(coc-definition)
+		nmap <silent> gy <Plug>(coc-type-definition)
+		nmap <silent> gi <Plug>(coc-implementation)
+		nmap <silent> gr <Plug>(coc-references)
 
-  " Use D to show documentation in preview window
-  nnoremap <silent> D :call <SID>show_documentation()<CR>
+		" Use D to show documentation in preview window
+		nnoremap <silent> D :call <SID>show_documentation()<CR>
 
-  function! s:show_documentation()
-    if (index(['vim','help'], &filetype) >= 0)
-      execute 'h '.expand('<cword>')
-    else
-      call CocAction('doHover')
-    endif
-  endfunction
+		function! s:show_documentation()
+			if (index(['vim','help'], &filetype) >= 0)
+				execute 'h '.expand('<cword>')
+			else
+				call CocAction('doHover')
+			endif
+		endfunction
 
-  " Remap for rename current word
-  nmap <rn> <Plug>(coc-rename)
+		" Remap for rename current word
+		nmap <rn> <Plug>(coc-rename)
 
-  " Remap for format selected region
-  xmap <leader>f  <Plug>(coc-format-selected)
-  nmap <leader>f  <Plug>(coc-format-selected)
+		" Remap for format selected region
+		xmap <leader>f  <Plug>(coc-format-selected)
+		nmap <leader>f  <Plug>(coc-format-selected)
 
-  augroup mygroup
-    autocmd!
-    " Setup formatexpr specified filetype(s).
-    autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-    " Update signature help on jump placeholder
-    autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-  augroup end
+		augroup mygroup
+			autocmd!
+			" Setup formatexpr specified filetype(s).
+			autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+			" Update signature help on jump placeholder
+			autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+		augroup end
 
-  " Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
-  xmap <leader>a  <Plug>(coc-codeaction-selected)
-  nmap <leader>a  <Plug>(coc-codeaction-selected)
+		" Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
+		xmap <leader>a  <Plug>(coc-codeaction-selected)
+		nmap <leader>a  <Plug>(coc-codeaction-selected)
 
-  " Remap for do codeAction of current line
-  nmap <leader>ac  <Plug>(coc-codeaction)
-  " Fix autofix problem of current line
-  nmap <leader>qf  <Plug>(coc-fix-current)
+		" Remap for do codeAction of current line
+		nmap <leader>ac  <Plug>(coc-codeaction)
+		" Fix autofix problem of current line
+		nmap <leader>qf  <Plug>(coc-fix-current)
 
-  " Create mappings for function text object, requires document symbols feature of languageserver.
-  xmap if <Plug>(coc-funcobj-i)
-  xmap af <Plug>(coc-funcobj-a)
-  omap if <Plug>(coc-funcobj-i)
-  omap af <Plug>(coc-funcobj-a)
+		" Create mappings for function text object, requires document symbols feature of languageserver.
+		xmap if <Plug>(coc-funcobj-i)
+		xmap af <Plug>(coc-funcobj-a)
+		omap if <Plug>(coc-funcobj-i)
+		omap af <Plug>(coc-funcobj-a)
 
-  " Use `:Format` to format current buffer
-  command! -nargs=0 Format :call CocAction('format')
+		" Use `:Format` to format current buffer
+		command! -nargs=0 Format :call CocAction('format')
 
-  " Use `:Fold` to fold current buffer
-  command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+		" Use `:Fold` to fold current buffer
+		command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 
-  " use `:OR` for organize import of current buffer
-  command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+		" use `:OR` for organize import of current buffer
+		command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
-  " Add status line support, for integration with other plugin, checkout `:h coc-status`
-  set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+		" Add status line support, for integration with other plugin, checkout `:h coc-status`
+		set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+	endif
+	let g:python3_host_prog='/home/kevsestrella/.virtualenvs/neovim/bin/python'
 endif

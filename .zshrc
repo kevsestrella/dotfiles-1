@@ -1,5 +1,5 @@
 # Flex on the ubuntu users
-neofetch
+# neofetch
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
@@ -138,3 +138,26 @@ SPACESHIP_JOBS_SHOW=false
 # Spaceship Prompt
 autoload -U promptinit; promptinit
 prompt spaceship
+
+source /usr/share/nvm/init-nvm.sh
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true"
+export WORKON_HOME=$HOME/.virtualenvs
+pyenv virtualenvwrapper_lazy
+# export PATH="$PATH:$HOME/code/flutter/bin"
+export ANDROID_SDK_ROOT='/opt/android-sdk'
+export JAVA_HOME='/usr/lib/jvm/java-8-openjdk'
+export JAVA_OPTS='-XX:+IgnoreUnrecognizedVMOptions'
+export ANDROID_HOME=$ANDROID_SDK_ROOT
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools/
+export PATH=$PATH:$ANDROID_HOME/tools/bin/
+export PATH=$PATH:$ANDROID_HOME/tools/
+export PATH=$ANDROID_HOME/emulator:$PATH
+
+source /usr/share/fzf/key-bindings.zsh
+source /usr/share/fzf/completion.zsh

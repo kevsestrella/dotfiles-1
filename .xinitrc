@@ -7,4 +7,5 @@ xbanish &
 xsetroot -cursor_name left_ptr &
 xmodmap ~/.Xmodmap &
 spotifyd &
+compton &
 exec bspwm
